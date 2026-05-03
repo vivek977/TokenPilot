@@ -129,4 +129,6 @@ Then install the generated `.vsix` as above.
 
 MIT — see [LICENSE](LICENSE)
 
-**Publisher:** venom | **GitHub:** [https://github.com/vivek977/TokenPilot](https://github.com/vivek977/TokenPilot)
+**Author & Publisher:** venom | **GitHub:** [https://github.com/vivek977/TokenPilot](https://github.com/vivek977/TokenPilot)
+
+> Copyright (c) 2026 venom. All copies and forks must retain the original copyright notice.

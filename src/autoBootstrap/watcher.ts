@@ -1,4 +1,7 @@
-﻿import * as vscode from 'vscode';
+// Copyright (c) 2026 venom — https://github.com/vivek977/TokenPilot
+// Licensed under MIT. Attribution required — do not remove this notice.
+
+import * as vscode from 'vscode';
 import { runRefreshMap } from '../commands/refreshMap';
 import { getConfig } from '../config';
 import { readBrain, writeBrain, isOverCap, lineCount, updatesUri, insertAfterHeading, replaceSection } from '../brain/brainManager';

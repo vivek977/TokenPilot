@@ -1,4 +1,7 @@
-﻿import { ParsedStep } from './planReader';
+// Copyright (c) 2026 venom — https://github.com/vivek977/TokenPilot
+// Licensed under MIT. Attribution required — do not remove this notice.
+
+import { ParsedStep } from './planReader';
 
 export interface PacketOptions {
   step: ParsedStep;

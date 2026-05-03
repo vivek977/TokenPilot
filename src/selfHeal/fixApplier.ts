@@ -1,4 +1,7 @@
-﻿import * as vscode from 'vscode';
+// Copyright (c) 2026 venom — https://github.com/vivek977/TokenPilot
+// Licensed under MIT. Attribution required — do not remove this notice.
+
+import * as vscode from 'vscode';
 import { CheckResult } from './checks';
 
 const SEVERITY_ICON: Record<string, string> = {

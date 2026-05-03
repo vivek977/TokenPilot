@@ -1,4 +1,7 @@
-﻿import * as vscode from 'vscode';
+// Copyright (c) 2026 venom — https://github.com/vivek977/TokenPilot
+// Licensed under MIT. Attribution required — do not remove this notice.
+
+import * as vscode from 'vscode';
 import * as path from 'path';
 import { safeWrite, ensureDir, applyTokens, readIfExists } from '../fileUtils';
 import { getConfig } from '../config';

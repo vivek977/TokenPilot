@@ -1,4 +1,7 @@
-﻿import * as vscode from 'vscode';
+// Copyright (c) 2026 venom — https://github.com/vivek977/TokenPilot
+// Licensed under MIT. Attribution required — do not remove this notice.
+
+import * as vscode from 'vscode';
 import { readIfExists, safeWrite } from '../fileUtils';
 import { getConfig } from '../config';
 import { readBrain, lineCount } from '../brain/brainManager';

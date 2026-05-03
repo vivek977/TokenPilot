@@ -1,3 +1,6 @@
+// Copyright (c) 2026 venom — https://github.com/vivek977/TokenPilot
+// Licensed under MIT. Attribution required — do not remove this notice.
+
 export interface PruneResult {
   pruned: string;
   removedCount: number;
