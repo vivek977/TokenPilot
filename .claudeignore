@@ -1,0 +1,68 @@
+# Budget Agent baseline .claudeignore
+# Claude Code will not autonomously read these paths.
+# For hard blocks (Claude cannot read even if asked), use permissions.deny in .claude/settings.json
+
+# Dependencies
+node_modules/
+.pnp/
+.yarn/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Test coverage
+coverage/
+.nyc_output/
+*.snap
+
+# Lock files (high token cost, low signal)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+Pipfile.lock
+
+# Logs and temp
+*.log
+*.tmp
+.cache/
+tmp/
+
+# Large assets and binaries
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.mp4
+*.mp3
+*.wav
+*.zip
+*.tar.gz
+*.wasm
+*.ttf
+*.woff
+*.woff2
+
+# IDE / OS noise
+.DS_Store
+Thumbs.db
+.idea/
+*.suo
+*.user
+
+# Generated docs
+docs/_build/
+site/

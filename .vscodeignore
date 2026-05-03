@@ -1,0 +1,17 @@
+src/
+test/
+.agent/
+.claude/
+.vscode/
+node_modules/
+tsconfig.json
+esbuild.js
+.gitignore
+.eslintrc*
+BUDGET_AGENT_PLAN.md
+CLAUDE.md
+plan.md
+project.md
+*.md
+*.ps1
+dist/*.map

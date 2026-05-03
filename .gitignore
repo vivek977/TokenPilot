@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.vsix
+*.js.map
+
+# Dev/project-specific files — not part of the extension source
+BUDGET_AGENT_PLAN.md
+.claude/
+plan.md
+project.md
+.agent/

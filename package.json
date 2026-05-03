@@ -1,0 +1,124 @@
+{
+  "name": "venom-tokenpilot",
+  "displayName": "Venom's Token Pilot",
+  "description": "Stateful VS Code companion for Claude Code — lean artifacts, prompt packets, persistent brain memory.",
+  "version": "0.1.5",
+  "publisher": "venom",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vivek977/TokenPilot"
+  },
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tokenPilot.initProject",
+        "title": "Venom's Token Pilot: Initialize Project"
+      },
+      {
+        "command": "tokenPilot.refreshMap",
+        "title": "Venom's Token Pilot: Refresh Project Map"
+      },
+      {
+        "command": "tokenPilot.buildPacket",
+        "title": "Venom's Token Pilot: Copy Prompt Packet"
+      },
+      {
+        "command": "tokenPilot.pruneBrain",
+        "title": "Venom's Token Pilot: Prune Brain"
+      },
+      {
+        "command": "tokenPilot.promoteInsight",
+        "title": "Venom's Token Pilot: Promote Insight → Brain"
+      },
+      {
+        "command": "tokenPilot.repairSuggestions",
+        "title": "Venom's Token Pilot: Repair Suggestions"
+      },
+      {
+        "command": "tokenPilot.agentModeToggle",
+        "title": "Venom's Token Pilot: Toggle Agent Mode"
+      },
+      {
+        "command": "tokenPilot.copyMcpSnippet",
+        "title": "Venom's Token Pilot: Copy MCP Registration Snippet"
+      },
+      {
+        "command": "tokenPilot.mergeUpdates",
+        "title": "Venom's Token Pilot: Merge Brain Updates"
+      }
+    ],
+    "configuration": {
+      "title": "Venom's Token Pilot",
+      "properties": {
+        "tokenPilot.autoSetupMode": {
+          "type": "string",
+          "enum": ["prompt", "trustedSilent", "off"],
+          "default": "prompt",
+          "description": "How to handle missing artifacts on workspace open. 'prompt' asks, 'trustedSilent' auto-creates in trusted workspaces, 'off' disables."
+        },
+        "tokenPilot.autoRefreshOnManifestChange": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-refresh project.md when package.json or pyproject.toml changes."
+        },
+        "tokenPilot.claudeMdMaxLines": {
+          "type": "number",
+          "default": 80,
+          "description": "Warn when CLAUDE.md exceeds this line count. Each line is re-sent every message."
+        },
+        "tokenPilot.claudeMdMaxTokens": {
+          "type": "number",
+          "default": 400,
+          "description": "Warn when CLAUDE.md estimated tokens (chars/4) exceed this value."
+        },
+        "tokenPilot.detectClaudeMdDuplicates": {
+          "type": "boolean",
+          "default": false,
+          "description": "Experimental: warn when CLAUDE.md prose appears to duplicate project.md content."
+        },
+        "tokenPilot.brainMaxLines": {
+          "type": "number",
+          "default": 200,
+          "description": "Warn and offer Prune when .agent/brain.md exceeds this line count."
+        },
+        "tokenPilot.includeBrainInPacket": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include brain.md live-state sections (Status, Active Task, Pending, Decisions) in prompt packets."
+        },
+        "tokenPilot.agentMode": {
+          "type": "string",
+          "enum": ["claudeCode", "hitl"],
+          "default": "claudeCode",
+          "description": "Packet format: 'claudeCode' includes @-paths, 'hitl' formats for claude.ai paste."
+        },
+        "tokenPilot.packetMaxAtPaths": {
+          "type": "number",
+          "default": 6,
+          "description": "Warn when a prompt packet includes more than this many @-paths."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "npm run build && vsce package --no-dependencies",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  }
+}
