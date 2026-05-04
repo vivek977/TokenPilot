@@ -60,12 +60,15 @@ export function applyUpdatesToBrain(
       const newBody = update.lines.join('\n');
       result = replaceSection(result, heading, newBody);
     } else {
-      for (const line of update.lines) {
-        if (!line.trim().startsWith('-')) { continue; }
+      for (const rawLine of update.lines) {
+        const trimmed = rawLine.trim();
+        if (!trimmed) { continue; }
+        // Auto-prefix lines that Claude wrote without a leading `-`
+        const bullet = trimmed.startsWith('-') ? trimmed : `- ${trimmed}`;
         // Skip if duplicate (normalized comparison)
-        const normalized = line.trim().toLowerCase();
+        const normalized = bullet.toLowerCase();
         if (result.split('\n').some(l => l.trim().toLowerCase() === normalized)) { continue; }
-        result = insertAfterHeading(result, heading, line.trim());
+        result = insertAfterHeading(result, heading, bullet);
       }
     }
   }

@@ -1,60 +1,33 @@
 # {{PROJECT_NAME}} — Claude Code Rules
 
-<!-- venom-tokenpilot-version: 0.1.8 -->
-<!-- Keep under 100 lines / 500 tokens. Behavior rules only — no docs prose. -->
+<!-- venom-tokenpilot-version: 0.1.10 -->
 
-## Session Start (do this FIRST — no exceptions)
+## Session Start
 
 1. Read `project.md` — stack, entry points, key files
-2. Read `.agent/brain.md` — check **Status**, **Active Task**, **Pending**, **Gotchas**, **Do-Not-Repeat**
-3. Read `plan.md` — current goal, active step, allowed files
-4. Check your own memory (`~/.claude/projects/`) — merge any saved facts with brain.md
-5. If **Active Task** is not `(none)`: that task was interrupted — resume it or record why you are not
+2. Read `.agent/brain.md` — **Status**, **Active Task**, **Pending**, **Gotchas**, **Do-Not-Repeat**, **Write-Back Format**
+3. Read `plan.md` — current goal, active step, files in scope
+4. Check native memory (`~/.claude/projects/`) for saved facts
+5. **Active Task** ≠ `(none)` → that session was interrupted, resume it
 
-## Memory Taxonomy — What to Save and Where
+## Write-Back (do this during AND at end of every session)
 
-Two layers. Both matter. Use them together.
+| Trigger | Target in updates.md |
+|---------|----------------------|
+| Task starts | `Active Task` — one line: what you are doing |
+| Decision made | `Decisions` + save to native memory |
+| Gotcha found | `Gotchas` + save to native memory |
+| Mistake corrected | `Do-Not-Repeat` + save to native memory |
+| Task done | `Active Task` → `- (none)`, then `Status` → one sentence |
+| After `/compact` | Re-read `plan.md` + `brain.md` before continuing |
 
-### Layer 1: `.agent/updates.md` → brain.md (project-owned, shared, in git)
-Append an `---UPDATE---` entry immediately when:
-- **Status changes** → `target: Status` — one sentence, current codebase truth
-- **Decision made** → `target: Decisions` — what was decided and WHY
-- **Gotcha found** → `target: Gotchas` — the trap, how to avoid it
-- **Mistake fixed** → `target: Do-Not-Repeat` — what went wrong, what the fix was
-- **Work queued** → `target: Pending` — next known item to tackle
-
-### Layer 2: Claude Code native memory (user-owned, survives machine wipes)
-Save to your own memory when:
-- **`project-fact`** — stack, build tool, key constraints that rarely change
-- **`decision`** — architectural choice + reason (same as brain.md, but persists even if brain.md is deleted)
-- **`gotcha`** — non-obvious behavior that cost >10 min to debug
-- **`do-not-repeat`** — user corrected your approach, or you broke something and fixed it
-- **`pattern`** — a solution that worked and will apply again
-
-**Rule:** If something took you more than 10 minutes to figure out — save it to BOTH layers. No exceptions.
-
-## During Work (write-back triggers)
-
-| Event | Action |
-|-------|--------|
-| Starting a task | Append `target: Active Task` to updates.md |
-| Made a decision | Append `target: Decisions` + save `decision` to memory |
-| Found a gotcha | Append `target: Gotchas` + save `gotcha` to memory |
-| User corrects you | Append `target: Do-Not-Repeat` + save `do-not-repeat` to memory |
-| Task finished | Append `target: Active Task` `- (none)` + update Status |
-| After `/compact` | Re-read `plan.md` AND `.agent/brain.md` before continuing |
-
-## Session End (do this LAST — before stopping)
-
-Append to `.agent/updates.md`:
-
+Session end minimum — always append both before stopping:
 ```
 ---UPDATE---
 target: Status
 date: YYYY-MM-DD
 One sentence: what is working, what is broken, what is half-done.
 ---END---
-
 ---UPDATE---
 target: Active Task
 date: YYYY-MM-DD
@@ -62,19 +35,15 @@ date: YYYY-MM-DD
 ---END---
 ```
 
-Then save a `project-fact` memory snapshot if anything about the project identity changed this session.
+## Scope
 
-## Scope Contract
+- Only touch files in the active `plan.md` step's **Files** list
+- Subagents for research — main thread edits only
 
-- Only touch files listed in the active `plan.md` step's **Files** section
-- Do NOT expand to unrelated modules without explicit instruction
-- Use **subagents** for broad research — main thread edits only
+## Exploration
 
-## Exploration Rules
-
-- Prefer **Grep** to locate symbols before **Read**
-- Never glob or read: `node_modules/`, `dist/`, `out/`, `.git/`, lock files
-- Treat `.claudeignore` as guidance for autonomous reads
+- Grep before Read
+- Never read: `node_modules/`, `dist/`, `out/`, `.git/`, lock files
 
 ## Non-negotiables
 

@@ -57,15 +57,41 @@ function extractVersion(content: string): string | null {
   return m ? m[1] : null;
 }
 
-function versionsMatch(a: string, b: string): boolean {
-  return a === b;
+/** Parse a semver string into [major, minor, patch] integers. */
+function parseSemver(v: string): [number, number, number] {
+  const parts = v.split('.').map(Number);
+  return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
+}
+
+/**
+ * Returns true if fileVersion is strictly OLDER than extVersion.
+ * Prevents upgrader from overwriting a file that is already at a newer stamp
+ * (e.g. user downgraded the extension).
+ */
+function isOlderThan(fileVersion: string, extVersion: string): boolean {
+  const [fMaj, fMin, fPat] = parseSemver(fileVersion);
+  const [eMaj, eMin, ePat] = parseSemver(extVersion);
+  if (fMaj !== eMaj) { return fMaj < eMaj; }
+  if (fMin !== eMin) { return fMin < eMin; }
+  return fPat < ePat;
 }
 
 /** Add any brain.md sections missing from current content without touching existing bullets. */
-function addMissingSections(current: string, templateContent: string): string {
+function addMissingSections(current: string, templateContent: string, projectName: string): string {
   let result = current;
+
+  // Fix H1 title if it still references an old project name or the old extension name.
+  // Only touch the first line that starts with `# Project Brain —`
+  result = result.replace(
+    /^(# Project Brain —\s*)(.+)$/m,
+    (_match, prefix) => `${prefix}${projectName}`
+  );
   for (const section of BRAIN_SECTIONS) {
-    if (!new RegExp(`^##\\s+${section}\\s*$`, 'm').test(result)) {
+    // Escape special regex chars in section name (e.g. "Do-Not-Repeat" has hyphens — safe,
+    // but guard against future section names with parens, brackets, etc.)
+    const escaped = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Match heading regardless of trailing whitespace — some editors add a trailing space
+    if (!new RegExp(`^##\\s+${escaped}\\s*$`, 'm').test(result)) {
       // Extract the section block from the template
       const tmplLines = templateContent.split('\n');
       const startIdx = tmplLines.findIndex(l => l.trim() === `## ${section}`);
@@ -94,6 +120,25 @@ function addMissingSections(current: string, templateContent: string): string {
   return result;
 }
 
+/** Returns the relative paths of managed files whose version stamp is older than extVersion. */
+export async function checkOutdatedFiles(
+  root: vscode.Uri,
+  extensionVersion: string
+): Promise<string[]> {
+  const result: string[] = [];
+  for (const spec of UPGRADEABLE) {
+    const parts = spec.relativePath.split(/[/\\]/);
+    const fileUri = vscode.Uri.joinPath(root, ...parts);
+    const content = await readIfExists(fileUri);
+    if (content === null) { continue; }
+    const fileVersion = extractVersion(content);
+    if (!fileVersion || isOlderThan(fileVersion, extensionVersion)) {
+      result.push(spec.relativePath);
+    }
+  }
+  return result;
+}
+
 export async function runUpgradeCheck(
   context: vscode.ExtensionContext,
   root: vscode.Uri,
@@ -103,18 +148,9 @@ export async function runUpgradeCheck(
   const date = new Date().toISOString().slice(0, 10);
   const cfg = getConfig();
 
-  // Check which files are outdated
-  const outdated: typeof UPGRADEABLE = [];
-  for (const spec of UPGRADEABLE) {
-    const parts = spec.relativePath.split(/[/\\]/);
-    const fileUri = vscode.Uri.joinPath(root, ...parts);
-    const content = await readIfExists(fileUri);
-    if (content === null) { continue; } // doesn't exist — init will handle it
-    const fileVersion = extractVersion(content);
-    if (!fileVersion || !versionsMatch(fileVersion, extensionVersion)) {
-      outdated.push(spec);
-    }
-  }
+  // Check which files are outdated (reuse pure function)
+  const outdatedPaths = await checkOutdatedFiles(root, extensionVersion);
+  const outdated = UPGRADEABLE.filter(s => outdatedPaths.includes(s.relativePath));
 
   if (outdated.length === 0) { return; }
 
@@ -152,7 +188,7 @@ export async function runUpgradeCheck(
       const existing = await readIfExists(fileUri);
       if (!existing) { continue; }
       const resolved = applyTokens(templateContent, spec.tokens(projectName, date, cfg));
-      const merged = addMissingSections(existing, resolved);
+      const merged = addMissingSections(existing, resolved, projectName);
       await safeWrite(fileUri, merged, true);
       upgraded++;
     }

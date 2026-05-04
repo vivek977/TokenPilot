@@ -1,6 +1,6 @@
 ﻿# Project Brain — {{PROJECT_NAME}}
 
-<!-- venom-tokenpilot-version: 0.1.8 -->
+<!-- venom-tokenpilot-version: 0.1.10 -->
 <!-- Bounded to {{BRAIN_MAX_LINES}} lines. Run "Venom's Token Pilot: Prune Brain" when over cap. -->
 <!-- Format: one bullet per entry. Inline date: <!-- date: YYYY-MM-DD --> -->
 <!-- WRITE-BACK CONTRACT: Claude Code must update .agent/updates.md after every task. -->
@@ -35,3 +35,14 @@
 ## Promoted Insights
 
 <!-- Facts promoted from session logs. Keep concise. -->
+
+## Write-Back Format
+
+<!-- Reference — how to write updates.md entries. Read once, do not re-read every turn. -->
+<!-- Layer 1: updates.md → brain.md (project-owned, in git) -->
+<!-- Append ---UPDATE--- blocks to .agent/updates.md. Extension auto-merges within 3s. -->
+<!-- target: Status | Active Task | Pending | Decisions | Gotchas | Do-Not-Repeat | Promoted Insights -->
+<!-- Status + Active Task: REPLACE section body. All others: APPEND bullet (deduped). -->
+<!-- Layer 2: native memory ~/.claude/projects/ (survives machine wipes) -->
+<!-- Save: project-fact, decision, gotcha, do-not-repeat, pattern -->
+<!-- 10-min rule: anything that took >10 min to figure out → save to BOTH layers. -->

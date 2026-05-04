@@ -7,6 +7,7 @@ import { getConfig } from '../config';
 import { readBrain, lineCount } from '../brain/brainManager';
 import { isDirty } from '../gitUtils';
 import { parseCurrentStep } from '../packet/planReader';
+import { checkOutdatedFiles } from '../autoBootstrap/upgrader';
 
 export interface FixSpec {
   description: string;
@@ -47,6 +48,7 @@ export async function runAllChecks(root: vscode.Uri): Promise<CheckResult[]> {
     checkPlanMdWhileDirty(root),
     checkBrainOverCap(root),
     checkOrphanPlaceholders(root),
+    checkManagedFileVersions(root),
   ]);
 
   return results.flat().filter((r): r is CheckResult => r !== null);
@@ -172,4 +174,28 @@ async function checkOrphanPlaceholders(root: vscode.Uri): Promise<CheckResult[]>
   }
 
   return results;
+}
+
+async function checkManagedFileVersions(root: vscode.Uri): Promise<CheckResult | null> {
+  const ext = vscode.extensions.getExtension('venom.venom-tokenpilot');
+  if (!ext) { return null; }
+
+  const extVersion: string = ext.packageJSON.version as string;
+  const outdated = await checkOutdatedFiles(root, extVersion);
+  if (outdated.length === 0) { return null; }
+
+  const names = outdated.map(p => p.split(/[/\\]/).pop() ?? p).join(', ');
+  return {
+    id:       'managed-files-outdated',
+    label:    `Managed file(s) outdated (${names})`,
+    severity: 'warning',
+    message:  `${names} have an older version stamp. Run "Upgrade" to get the latest templates.`,
+    fix: {
+      description: 'Trigger upgrade for outdated managed files',
+      apply: async () => {
+        // Re-run the full bootstrap check which calls runUpgradeCheck
+        vscode.commands.executeCommand('workbench.action.reloadWindow');
+      },
+    },
+  };
 }

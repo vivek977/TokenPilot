@@ -2,7 +2,7 @@
   "name": "venom-tokenpilot",
   "displayName": "Venom's Token Pilot",
   "description": "Stateful VS Code companion for Claude Code — lean artifacts, prompt packets, persistent brain memory.",
-  "version": "0.1.8",
+  "version": "0.1.12",
   "publisher": "venom",
   "repository": {
     "type": "git",
@@ -53,6 +53,10 @@
       {
         "command": "tokenPilot.mergeUpdates",
         "title": "Venom's Token Pilot: Merge Brain Updates"
+      },
+      {
+        "command": "tokenPilot.addPlanStep",
+        "title": "Venom's Token Pilot: Add Plan Step"
       }
     ],
     "configuration": {

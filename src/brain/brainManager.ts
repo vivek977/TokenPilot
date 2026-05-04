@@ -32,11 +32,18 @@ export function replaceSection(content: string, heading: string, newBody: string
     sectionEnd++;
   }
 
+  // Drop leading blank lines from the remainder so we don't accumulate
+  // double-blank-lines each time Status / Active Task is replaced.
+  let trimmedEnd = sectionEnd;
+  while (trimmedEnd < lines.length && lines[trimmedEnd].trim() === '') {
+    trimmedEnd++;
+  }
+
   return [
     ...lines.slice(0, contentStart),
     ...newBody.split('\n'),
     '',
-    ...lines.slice(sectionEnd),
+    ...lines.slice(trimmedEnd),
   ].join('\n');
 }
 
@@ -56,6 +63,25 @@ export function isOverCap(content: string): boolean {
   return lineCount(content) > getConfig().brainMaxLines;
 }
 
+const DATE_STAMP_RE = /<!--\s*date:\s*(\d{4}-\d{2}-\d{2})\s*-->/g;
+
+/**
+ * Scan brain.md for all <!-- date: YYYY-MM-DD --> stamps and return the most
+ * recent one, or null if none exist. Used by the status bar freshness indicator.
+ */
+export function getLastUpdatedDate(content: string): string | null {
+  let latest: string | null = null;
+  let match: RegExpExecArray | null;
+  // Reset lastIndex since we reuse the regex
+  DATE_STAMP_RE.lastIndex = 0;
+  while ((match = DATE_STAMP_RE.exec(content)) !== null) {
+    if (!latest || match[1] > latest) {
+      latest = match[1];
+    }
+  }
+  return latest;
+}
+
 /** Insert bullet after a section heading, respecting the fixed-section structure. */
 export function insertAfterHeading(content: string, heading: string, bullet: string): string {
   const lines = content.split('\n');
@@ -68,6 +94,16 @@ export function insertAfterHeading(content: string, heading: string, bullet: str
   // Skip comment lines immediately after the heading
   let insertAt = idx + 1;
   while (insertAt < lines.length && lines[insertAt].trim().startsWith('<!--')) {
+    insertAt++;
+  }
+
+  // Advance past existing bullet lines so new entries append at the BOTTOM
+  // of the section (chronological order), not the top.
+  while (
+    insertAt < lines.length &&
+    lines[insertAt].trim() !== '' &&
+    !/^##\s/.test(lines[insertAt])
+  ) {
     insertAt++;
   }
 

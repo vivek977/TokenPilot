@@ -8,6 +8,9 @@ import { readBrain, writeBrain, isOverCap, lineCount, updatesUri, insertAfterHea
 import { readIfExists } from '../fileUtils';
 import { parseUpdates, applyUpdatesToBrain, truncateUpdates } from '../brain/updatesMerger';
 
+/** Fired after every successful brain merge. Listeners receive the merged content. */
+export const onBrainMerged = new vscode.EventEmitter<string>();
+
 export function registerManifestWatcher(context: vscode.ExtensionContext): void {
   const watcher = vscode.workspace.createFileSystemWatcher(
     '**/{package.json,pyproject.toml}'
@@ -106,6 +109,9 @@ async function runUpdatesMerge(): Promise<void> {
 
   const cleared = truncateUpdates();
   await vscode.workspace.fs.writeFile(updatesUri(root), Buffer.from(cleared, 'utf8'));
+
+  // Notify status bar and other listeners that brain was just updated
+  onBrainMerged.fire(merged);
 
   if (isOverCap(merged)) {
     const cfg = getConfig();

@@ -10,11 +10,13 @@ import { registerPromoteInsight } from './commands/promoteInsight';
 import { registerRepairSuggestions } from './commands/repairSuggestions';
 import { registerAgentModeToggle } from './commands/agentModeToggle';
 import { registerCopyMcpSnippet } from './commands/copyMcpSnippet';
+import { registerAddPlanStep } from './commands/addPlanStep';
 import { readIfExists } from './fileUtils';
 import { registerClaudeMdLinter } from './lint/claudeMdLinter';
 import { registerStatusBar } from './statusBar';
 import { registerManifestWatcher, registerBrainCapWatcher, registerUpdatesWatcher, registerMergeUpdatesCommand } from './autoBootstrap/watcher';
 import { runUpgradeCheck } from './autoBootstrap/upgrader';
+import { runSessionRecoveryCheck } from './autoBootstrap/sessionRecovery';
 import { runRefreshMap } from './commands/refreshMap';
 import { getConfig } from './config';
 
@@ -27,6 +29,7 @@ export function activate(context: vscode.ExtensionContext): void {
   registerRepairSuggestions(context);
   registerAgentModeToggle(context);
   registerCopyMcpSnippet(context);
+  registerAddPlanStep(context);
   registerClaudeMdLinter(context);
   registerManifestWatcher(context);
   registerBrainCapWatcher(context);
@@ -66,6 +69,9 @@ async function runBootstrapCheck(context: vscode.ExtensionContext): Promise<void
   // Check for outdated managed files and offer to upgrade
   const extVersion: string = context.extension.packageJSON.version as string;
   await runUpgradeCheck(context, root, extVersion);
+
+  // Check for stale brain or interrupted session — copy recovery prompt if needed
+  await runSessionRecoveryCheck(root);
 
   // Check which core artifacts are missing
   const missing: string[] = [];
