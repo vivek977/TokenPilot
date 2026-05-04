@@ -1,15 +1,48 @@
 # {{PROJECT_NAME}} — Claude Code Rules
 
-<!-- venom-tokenpilot-version: 0.1.7 -->
-<!-- Keep under 80 lines / 400 tokens. Behavior rules only — no docs prose. -->
+<!-- venom-tokenpilot-version: 0.1.8 -->
+<!-- Keep under 100 lines / 500 tokens. Behavior rules only — no docs prose. -->
 
 ## Session Start (do this FIRST — no exceptions)
 
 1. Read `project.md` — stack, entry points, key files
-2. Read `.agent/brain.md` — check **Status** (current state), **Active Task** (anything in flight?), **Pending** (what's queued)
+2. Read `.agent/brain.md` — check **Status**, **Active Task**, **Pending**, **Gotchas**, **Do-Not-Repeat**
 3. Read `plan.md` — current goal, active step, allowed files
-4. If **Active Task** is not `(none)`: that task was interrupted — resume it or record why you are not
-5. Check your own memory (`~/.claude/projects/`) for any saved facts about this project — merge with brain.md knowledge
+4. Check your own memory (`~/.claude/projects/`) — merge any saved facts with brain.md
+5. If **Active Task** is not `(none)`: that task was interrupted — resume it or record why you are not
+
+## Memory Taxonomy — What to Save and Where
+
+Two layers. Both matter. Use them together.
+
+### Layer 1: `.agent/updates.md` → brain.md (project-owned, shared, in git)
+Append an `---UPDATE---` entry immediately when:
+- **Status changes** → `target: Status` — one sentence, current codebase truth
+- **Decision made** → `target: Decisions` — what was decided and WHY
+- **Gotcha found** → `target: Gotchas` — the trap, how to avoid it
+- **Mistake fixed** → `target: Do-Not-Repeat` — what went wrong, what the fix was
+- **Work queued** → `target: Pending` — next known item to tackle
+
+### Layer 2: Claude Code native memory (user-owned, survives machine wipes)
+Save to your own memory when:
+- **`project-fact`** — stack, build tool, key constraints that rarely change
+- **`decision`** — architectural choice + reason (same as brain.md, but persists even if brain.md is deleted)
+- **`gotcha`** — non-obvious behavior that cost >10 min to debug
+- **`do-not-repeat`** — user corrected your approach, or you broke something and fixed it
+- **`pattern`** — a solution that worked and will apply again
+
+**Rule:** If something took you more than 10 minutes to figure out — save it to BOTH layers. No exceptions.
+
+## During Work (write-back triggers)
+
+| Event | Action |
+|-------|--------|
+| Starting a task | Append `target: Active Task` to updates.md |
+| Made a decision | Append `target: Decisions` + save `decision` to memory |
+| Found a gotcha | Append `target: Gotchas` + save `gotcha` to memory |
+| User corrects you | Append `target: Do-Not-Repeat` + save `do-not-repeat` to memory |
+| Task finished | Append `target: Active Task` `- (none)` + update Status |
+| After `/compact` | Re-read `plan.md` AND `.agent/brain.md` before continuing |
 
 ## Session End (do this LAST — before stopping)
 
@@ -29,26 +62,7 @@ date: YYYY-MM-DD
 ---END---
 ```
 
-Also append one entry per decision, gotcha, or mistake discovered this session.
-
-## Claude Code Memory (built-in persistence layer)
-
-Use Claude Code's own memory system as a **backup layer** for critical project facts:
-
-- ARCHITECTURAL decisions that rarely change → save to your memory so they survive even if brain.md is missing
-- RECURRING mistakes or gotchas → save to memory so you remember them in any future session
-- PROJECT identity facts (stack, key constraints, non-negotiables) → save once, refresh if they change
-
-To save: use the memory tools available in your session (Write to `~/.claude/projects/<project>/memory/`).
-brain.md is the primary source of truth — your memory is the safety net.
-
-## During Work (write-back contract)
-
-- START a task → append `target: Active Task` with what you are doing
-- DISCOVER a gotcha or make a decision → immediately append to `.agent/updates.md`
-- FIX a mistake → append `target: Do-Not-Repeat` entry AND save to your own memory
-- FINISH a task → append `target: Active Task` with `- (none)` and update Status
-- After `/compact` → re-read `plan.md` AND `.agent/brain.md` before continuing
+Then save a `project-fact` memory snapshot if anything about the project identity changed this session.
 
 ## Scope Contract
 
