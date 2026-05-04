@@ -2,7 +2,7 @@
   "name": "venom-tokenpilot",
   "displayName": "Venom's Token Pilot",
   "description": "Stateful VS Code companion for Claude Code — lean artifacts, prompt packets, persistent brain memory.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "publisher": "venom",
   "repository": {
     "type": "git",

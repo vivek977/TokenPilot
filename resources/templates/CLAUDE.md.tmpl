@@ -1,6 +1,6 @@
 # {{PROJECT_NAME}} — Claude Code Rules
 
-<!-- venom-tokenpilot-version: 0.1.5 -->
+<!-- venom-tokenpilot-version: 0.1.7 -->
 <!-- Keep under 80 lines / 400 tokens. Behavior rules only — no docs prose. -->
 
 ## Session Start (do this FIRST — no exceptions)
@@ -9,6 +9,7 @@
 2. Read `.agent/brain.md` — check **Status** (current state), **Active Task** (anything in flight?), **Pending** (what's queued)
 3. Read `plan.md` — current goal, active step, allowed files
 4. If **Active Task** is not `(none)`: that task was interrupted — resume it or record why you are not
+5. Check your own memory (`~/.claude/projects/`) for any saved facts about this project — merge with brain.md knowledge
 
 ## Session End (do this LAST — before stopping)
 
@@ -30,11 +31,22 @@ date: YYYY-MM-DD
 
 Also append one entry per decision, gotcha, or mistake discovered this session.
 
+## Claude Code Memory (built-in persistence layer)
+
+Use Claude Code's own memory system as a **backup layer** for critical project facts:
+
+- ARCHITECTURAL decisions that rarely change → save to your memory so they survive even if brain.md is missing
+- RECURRING mistakes or gotchas → save to memory so you remember them in any future session
+- PROJECT identity facts (stack, key constraints, non-negotiables) → save once, refresh if they change
+
+To save: use the memory tools available in your session (Write to `~/.claude/projects/<project>/memory/`).
+brain.md is the primary source of truth — your memory is the safety net.
+
 ## During Work (write-back contract)
 
 - START a task → append `target: Active Task` with what you are doing
 - DISCOVER a gotcha or make a decision → immediately append to `.agent/updates.md`
-- FIX a mistake → append `target: Do-Not-Repeat` entry
+- FIX a mistake → append `target: Do-Not-Repeat` entry AND save to your own memory
 - FINISH a task → append `target: Active Task` with `- (none)` and update Status
 - After `/compact` → re-read `plan.md` AND `.agent/brain.md` before continuing
 
