@@ -1,7 +1,7 @@
 {
   "name": "venom-tokenpilot",
   "displayName": "Venom's Token Pilot",
-  "description": "Stateful VS Code companion for Claude Code — lean artifacts, prompt packets, persistent brain memory.",
+  "description": "Manages the files Claude Code loads at session start — CLAUDE.md, project map, plan, brain memory, and ignore rules. File-based, no API required.",
   "version": "0.1.16",
   "publisher": "venom",
   "repository": {
