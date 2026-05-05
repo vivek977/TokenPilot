@@ -31,16 +31,29 @@ export async function runSessionRecoveryCheck(root: vscode.Uri): Promise<void> {
 
   lines.push(`<!-- Venom's Token Pilot: Session Recovery — ${date} -->`);
   lines.push('');
+  lines.push('DO THIS BEFORE ANYTHING ELSE. Do not start any task until these steps are complete.');
+  lines.push('');
 
+  let stepNum = 1;
+
+  // ── Always: read the files first ─────────────────────────────────────────
+  lines.push(`**Step ${stepNum++}: Read these files in order**`);
+  lines.push('1. Read `project.md` — understand the stack and entry points');
+  lines.push('2. Read `.agent/brain.md` — understand current Status, Decisions, Gotchas');
+  lines.push('3. Read `plan.md` — understand the current goal and active step');
+  lines.push('');
+
+  // ── Interrupted session ───────────────────────────────────────────────────
   if (wasInterrupted) {
-    lines.push('## Interrupted Session Detected');
+    lines.push(`**Step ${stepNum++}: Interrupted session — resume or close it**`);
     lines.push('');
-    lines.push(`The previous session was interrupted. Active Task was:`);
+    lines.push(`The previous session ended without clearing Active Task. It was:`);
     lines.push(`> ${interrupted}`);
     lines.push('');
-    lines.push('Before starting new work:');
-    lines.push('1. Read `.agent/brain.md` — check what was in progress');
-    lines.push('2. Either resume the interrupted task or append to `.agent/updates.md`:');
+    lines.push('You have two choices:');
+    lines.push('- **Resume it** — continue that task now');
+    lines.push('- **Close it** — if it was already finished or no longer relevant, append this to `.agent/updates.md` exactly:');
+    lines.push('');
     lines.push('```');
     lines.push('---UPDATE---');
     lines.push('target: Active Task');
@@ -48,29 +61,45 @@ export async function runSessionRecoveryCheck(root: vscode.Uri): Promise<void> {
     lines.push('- (none)');
     lines.push('---END---');
     lines.push('```');
+    lines.push('');
+    lines.push('The extension will auto-merge this within 3 seconds. Do not edit brain.md directly.');
+    lines.push('');
   }
 
+  // ── Stale brain ───────────────────────────────────────────────────────────
   if (brainStale) {
-    if (wasInterrupted) { lines.push(''); }
-    lines.push('## Brain is Stale');
+    lines.push(`**Step ${stepNum++}: Update brain Status — it is out of date**`);
     lines.push('');
     lines.push(
       lastBrain
-        ? `brain.md was last updated ${lastBrain} but git has commits since then.`
-        : `brain.md has no date stamps — it has never been updated by Claude.`
+        ? `brain.md Status was last written on ${lastBrain}. Git has commits after that date meaning work happened that Claude never recorded.`
+        : `brain.md has never been updated by Claude. It shows the initial state only.`
     );
     lines.push('');
-    lines.push('Before starting new work:');
-    lines.push('1. Read `.agent/brain.md` — review current Status and Decisions');
-    lines.push('2. Update Status to reflect the actual current codebase state:');
+    lines.push('After reading the files in Step 1:');
+    lines.push('');
+    lines.push('1. Write one sentence describing the actual current state of this codebase.');
+    lines.push('   What is working? What is broken? What is half-done?');
+    lines.push('   Do NOT copy a template. Write a real sentence based on what you just read.');
+    lines.push('');
+    lines.push('2. Then append to `.agent/updates.md` using this exact format,');
+    lines.push('   replacing YOUR_SENTENCE with the sentence you just wrote:');
+    lines.push('');
     lines.push('```');
     lines.push('---UPDATE---');
     lines.push('target: Status');
     lines.push(`date: ${date}`);
-    lines.push('(one sentence: what is working, what is broken, what is half-done)');
+    lines.push('- YOUR_SENTENCE');
     lines.push('---END---');
     lines.push('```');
+    lines.push('');
+    lines.push('The extension auto-merges within 3 seconds. Do not edit brain.md directly.');
+    lines.push('');
   }
+
+  lines.push(`**Step ${stepNum}: Confirm brain is current, then start your task**`);
+  lines.push('Check the VS Code status bar — it should show `Brain: today` after the merge.');
+  lines.push('Only then proceed with new work.');
 
   const prompt = lines.join('\n');
 

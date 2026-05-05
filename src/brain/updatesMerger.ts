@@ -9,6 +9,23 @@ export interface ParsedUpdate {
 
 export const REPLACE_TARGETS = new Set(['Status', 'Active Task']);
 
+// Template placeholder strings that should never land in brain.md
+const PLACEHOLDER_BULLETS = new Set([
+  'bullet or replacement text',
+  'your_sentence',
+  'add notes here',
+  'add files here',
+  '(add notes here)',
+  '(add files here)',
+  'one sentence: what is working, what is broken, what is half-done.',
+  '(one sentence: codebase state after this task)',
+]);
+
+function isPlaceholder(text: string): boolean {
+  const lower = text.replace(/^-\s*/, '').toLowerCase().trim();
+  return PLACEHOLDER_BULLETS.has(lower);
+}
+
 const HEADER = "<!-- Venom's Token Pilot updates staging file. Claude Code appends entries here. Extension merges to brain.md. -->\n<!-- Do not edit manually. Auto-cleared after each merge. -->\n";
 
 export function parseUpdates(content: string): ParsedUpdate[] {
@@ -65,6 +82,8 @@ export function applyUpdatesToBrain(
         if (!trimmed) { continue; }
         // Auto-prefix lines that Claude wrote without a leading `-`
         const bullet = trimmed.startsWith('-') ? trimmed : `- ${trimmed}`;
+        // Drop known template placeholder strings before they poison brain.md
+        if (isPlaceholder(bullet)) { continue; }
         // Skip if duplicate (normalized comparison)
         const normalized = bullet.toLowerCase();
         if (result.split('\n').some(l => l.trim().toLowerCase() === normalized)) { continue; }

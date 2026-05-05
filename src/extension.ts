@@ -11,6 +11,7 @@ import { registerRepairSuggestions } from './commands/repairSuggestions';
 import { registerAgentModeToggle } from './commands/agentModeToggle';
 import { registerCopyMcpSnippet } from './commands/copyMcpSnippet';
 import { registerAddPlanStep } from './commands/addPlanStep';
+import { registerCopyPermissionsDeny } from './commands/copyPermissionsDeny';
 import { readIfExists } from './fileUtils';
 import { registerClaudeMdLinter } from './lint/claudeMdLinter';
 import { registerStatusBar } from './statusBar';
@@ -30,6 +31,7 @@ export function activate(context: vscode.ExtensionContext): void {
   registerAgentModeToggle(context);
   registerCopyMcpSnippet(context);
   registerAddPlanStep(context);
+  registerCopyPermissionsDeny(context);
   registerClaudeMdLinter(context);
   registerManifestWatcher(context);
   registerBrainCapWatcher(context);
@@ -81,6 +83,7 @@ async function runBootstrapCheck(context: vscode.ExtensionContext): Promise<void
     ['plan.md', 'plan.md'],
     ['.claudeignore', '.claudeignore'],
     ['.agent/brain.md', '.agent/brain.md'],
+    ['.agent/updates.md', '.agent/updates.md'],
   ];
 
   for (const [label, rel] of checks) {

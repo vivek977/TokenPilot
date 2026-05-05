@@ -4,6 +4,43 @@
 export interface PruneResult {
   pruned: string;
   removedCount: number;
+  placeholderCount: number;
+  placeholderLines: string[];
+}
+
+// Must stay in sync with updatesMerger.ts PLACEHOLDER_BULLETS
+const PLACEHOLDER_BULLETS = new Set([
+  'bullet or replacement text',
+  'your_sentence',
+  'add notes here',
+  'add files here',
+  '(add notes here)',
+  '(add files here)',
+  'one sentence: what is working, what is broken, what is half-done.',
+  '(one sentence: codebase state after this task)',
+]);
+
+function isPlaceholder(line: string): boolean {
+  const lower = line.trim().replace(/^-\s*/, '').toLowerCase();
+  return PLACEHOLDER_BULLETS.has(lower);
+}
+
+export function findPlaceholders(content: string): string[] {
+  return content.split('\n').filter(l => l.trim().startsWith('-') && isPlaceholder(l));
+}
+
+export function removePlaceholders(content: string): { result: string; count: number } {
+  const lines = content.split('\n');
+  const kept: string[] = [];
+  let count = 0;
+  for (const line of lines) {
+    if (line.trim().startsWith('-') && isPlaceholder(line)) {
+      count++;
+    } else {
+      kept.push(line);
+    }
+  }
+  return { result: kept.join('\n'), count };
 }
 
 export function pruneBrain(content: string): PruneResult {
@@ -27,5 +64,8 @@ export function pruneBrain(content: string): PruneResult {
     result.push(line);
   }
 
-  return { pruned: result.join('\n'), removedCount };
+  // Detect placeholders in the deduplicated result (reported separately, removed on user confirm)
+  const placeholderLines = findPlaceholders(result.join('\n'));
+
+  return { pruned: result.join('\n'), removedCount, placeholderCount: placeholderLines.length, placeholderLines };
 }
